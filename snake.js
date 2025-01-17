@@ -1,5 +1,6 @@
+const SNAKE_SIZE = 50;
 const CELL_SIZE = 20;
-const VELOCITY = 2;
+const VELOCITY = 10;
 const MOVE_INTERNAL = 1 / VELOCITY;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -22,11 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
   var fpsLabel = document.createElement('div');
   fpsLabel.classList.add('fps');
 
-  var snake = [
-    {row: 10, col: 10},
-    {row: 10, col: 11},
-    {row: 10, col: 12},
-  ];
+  var food;
+  let k = 0;
+  var snake = new Array(SNAKE_SIZE).fill({}).map(() => {
+    k++;
+    return { row: 10, col: 10 + k};
+  });
 
   function createGrid() {
     const g = [];
@@ -48,6 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
           } else {
             div.classList.add('empty');
           }
+        }
+
+        if (food.row === row && food.col === col) {
+            div.classList.add('food');
         }
 
         g[row].push(div);
@@ -73,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function computeSnake(deltaTime) {
     acc += deltaTime;
 
-    if (acc >= MOVE_INTERNAL) {
+    while (acc >= MOVE_INTERNAL) {
       let cur = snake.length - 1;
       let old = { ...snake[cur] };
       snake[cur].row = snake[cur].row + moves[lastKey].row;
@@ -91,6 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
         snake[cur - 1].row = old.row;
         old = s;
         cur -= 1;
+      }
+
+      if (snake[snake.length - 1].col === food.col && snake[snake.length - 1].row === food.row) {
+        snake.unshift({ row: old.row, col: old.col });
+        generateFood();
       }
 
       acc -= MOVE_INTERNAL;
@@ -143,12 +154,20 @@ document.addEventListener('DOMContentLoaded', () => {
     window.requestAnimationFrame(drawElements);
   }
 
+  function generateFood() {
+    const row = Math.floor(Math.random() * gridHeight);
+    const col = Math.floor(Math.random() * gridWidth);
+    food = { row, col };
+  }
+
   function resize() {
     w = body.clientWidth;
     h = body.clientHeight;
     gridWidth = Math.floor(w / CELL_SIZE);
     gridHeight = Math.floor(h / CELL_SIZE);
   }
+
+  generateFood();
 
   window.addEventListener('resize', resize);
   window.addEventListener('keydown', changeSnakeDirection);
