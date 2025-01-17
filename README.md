@@ -1,6 +1,6 @@
 # Snake Game HTML Divs
 
-![](./thumb.png)
+![](./demo.png)
 
 ## It is just a performance test using the snake game as an example. 
 
@@ -14,15 +14,15 @@ The main goal is to test the performance of the game using different methods to 
 
 ### First implementation:
 > * 800x600
->    * snake size 10 -> ~60 FPS
->    * snake size 50 -> ~60 FPS
->    * snake size 100 -> ~51 FPS
->    * snake size 500 -> ~14 FPS
->    * snake size 1000 -> ~7 FPS
+>    * snake size 10 = ~60 FPS
+>    * snake size 50 = ~60 FPS
+>    * snake size 100 = ~51 FPS
+>    * snake size 500 = ~14 FPS
+>    * snake size 1000 = ~7 FPS
 >
 > * 1920x1080
->    * snake size 10 -> ~34 FPS
->    * snake size 50 -> ~22 FPS
->    * snake size 100 -> ~15 FPS
->    * snake size 500 -> ~4 FPS
->    * snake size 1000 -> ~2 FPS
+>    * snake size 10 = ~34 FPS
+>    * snake size 50 = ~22 FPS
+>    * snake size 100 = ~15 FPS
+>    * snake size 500 = ~4 FPS
+>    * snake size 1000 = ~2 FPS
