@@ -1,8 +1,18 @@
 const CELL_SIZE = 20;
+const VELOCITY = 2;
+const MOVE_INTERNAL = 1 / VELOCITY;
 
 document.addEventListener('DOMContentLoaded', () => {
   var body = document.body;
+  var acc = 0;
   var grid = [];
+  var lastKey = 'KeyD';
+  var moves = {
+    'KeyA': { row: 0, col: -1 },
+    'KeyD': { row: 0, col: 1 },
+    'KeyW': { row: -1, col: 0 },
+    'KeyS': { row: 1, col: 0 },
+  };
   var w = body.clientWidth;
   var h = body.clientHeight;
   var gridWidth = Math.floor(w / CELL_SIZE);
@@ -12,11 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
   var fpsLabel = document.createElement('div');
   fpsLabel.classList.add('fps');
 
-  var snake = {
-    '10-11': true,
-    '10-12': true,
-    '10-13': true,
-  };
+  var snake = [
+    {row: 10, col: 10},
+    {row: 10, col: 11},
+    {row: 10, col: 12},
+  ];
 
   function createGrid() {
     const g = [];
@@ -32,10 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
         div.style.top = `${row * CELL_SIZE}px`;
         div.style.left = `${col * CELL_SIZE}px`;
 
-        if (snake[`${row}-${col}`]) {
-          div.classList.add('filled');
-        } else {
-          div.classList.add('empty');
+        for (let i = 0; i < snake.length; i++) {
+          if (snake[i].col === col && snake[i].row === row) {
+            div.classList.add('filled');
+          } else {
+            div.classList.add('empty');
+          }
         }
 
         g[row].push(div);
@@ -54,26 +66,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fps = fpsAvg.reduce((a, b) => a + b) / fpsAvg.length;
     fpsLabel.textContent = Math.floor(1 / fps);
+
+    return deltaTime;
   }
 
-  function computeSnake(timestamp) {
-    // TODO
+  function computeSnake(deltaTime) {
+    acc += deltaTime;
+
+    if (acc >= MOVE_INTERNAL) {
+      let cur = snake.length - 1;
+      let old = { ...snake[cur] };
+      snake[cur].row = snake[cur].row + moves[lastKey].row;
+      snake[cur].col = snake[cur].col + moves[lastKey].col;
+
+      const head = snake[cur];
+      if (head.col >= gridWidth) head.col = 0;
+      else if (head.col < 0) head.col = gridWidth - 1;
+      else if (head.row >= gridHeight) head.row = 0;
+      else if (head.row < 0) head.row = gridHeight - 1;
+
+      while (cur) {
+        const s = { ...snake[cur - 1] };
+        snake[cur - 1].col = old.col;
+        snake[cur - 1].row = old.row;
+        old = s;
+        cur -= 1;
+      }
+
+      acc -= MOVE_INTERNAL;
+    }
+  }
+
+  function changeSnakeDirection(event) {
+    switch (event.code) {
+      case 'KeyA':
+        if (lastKey === 'KeyD') return;
+        lastKey = event.code;
+        break;
+      case 'KeyD':
+        if (lastKey === 'KeyA') return;
+        lastKey = event.code;
+        break;
+      case 'KeyW':
+        if (lastKey === 'KeyS') return;
+        lastKey = event.code;
+        break;
+      case 'KeyS':
+        if (lastKey === 'KeyW') return;
+        lastKey = event.code;
+        break;
+    }
   }
 
   function drawElements(timestamp) {
-    fpsInfo(timestamp);
-
-    computeSnake(timestamp);
-
     const r = document.getElementById('root');
     if (r) r.remove();
+
+    const deltaTime = fpsInfo(timestamp);
+    computeSnake(deltaTime);
 
     grid = createGrid();
 
     const root = document.createElement('div');
     root.id = 'root';
     root.style.position = 'relative';
-    root.style.height = '100%';
 
     for (let row = 0; row < gridHeight; row++) {
       for (let col = 0; col < gridWidth; col++) {
@@ -95,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.addEventListener('resize', resize);
+  window.addEventListener('keydown', changeSnakeDirection);
   window.requestAnimationFrame(timestamp => {
     prevTimestamp = timestamp;
     window.requestAnimationFrame(drawElements);
