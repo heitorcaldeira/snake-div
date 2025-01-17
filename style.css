@@ -2,4 +2,28 @@ html, body {
   margin: 0;
   padding: 0;
   background: #181818;
+  height: 100%;
+}
+
+.fps {
+  position: fixed;
+  color: wheat;
+  left: 40px;
+  top: 40px;
+  font-size: 32px;
+}
+
+.empty {
+  background: #181818;
+  border: 1px solid #333;
+}
+
+.filled {
+  background: #55aa00;
+  border: 1px solid #333;
+}
+
+.food {
+  background: #ee3333;
+  border: 1px solid #333;
 }
