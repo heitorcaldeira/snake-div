@@ -1,6 +1,6 @@
-const SNAKE_SIZE = 50;
+const SNAKE_SIZE = 100;
 const CELL_SIZE = 20;
-const VELOCITY = 10;
+const VELOCITY = 20;
 const MOVE_INTERNAL = 1 / VELOCITY;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -31,10 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function createGrid() {
-    const g = [];
+    const r = document.getElementById('root');
+    if (r) r.remove();
+
+    const root = document.createElement('div');
+    root.id = 'root';
+    root.style.position = 'relative';
 
     for (let row = 0; row < gridHeight; row++) {
-      if (!g[row]) g.push([]);
+      if (!grid[row]) grid.push([]);
 
       for (let col = 0; col < gridWidth; col++) {
         const div = document.createElement('div');
@@ -44,23 +49,29 @@ document.addEventListener('DOMContentLoaded', () => {
         div.style.top = `${row * CELL_SIZE}px`;
         div.style.left = `${col * CELL_SIZE}px`;
 
-        for (let i = 0; i < snake.length; i++) {
-          if (snake[i].col === col && snake[i].row === row) {
-            div.classList.add('filled');
-          } else {
-            div.classList.add('empty');
-          }
-        }
-
-        if (food.row === row && food.col === col) {
-            div.classList.add('food');
-        }
-
-        g[row].push(div);
+        grid[row].push(div);
+        root.appendChild(div);
       }
     }
 
-    return g;
+    root.appendChild(fpsLabel);
+    body.appendChild(root);
+  }
+
+  function updateGrid() {
+    for (let row = 0; row < gridHeight; row++) {
+      for (let col = 0; col < gridWidth; col++) {
+        grid[row][col].className = 'empty';
+
+        if (food.row === row && food.col === col) {
+            grid[row][col].className = 'food';
+        }
+      }
+    }
+
+    for (let i = 0; i < snake.length; i++) {
+      grid[Math.min(snake[i].row, gridHeight-1)][Math.min(snake[i].col, gridWidth-1)].className = 'filled';
+    }
   }
 
   function fpsInfo(timestamp) {
@@ -130,27 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function drawElements(timestamp) {
-    const r = document.getElementById('root');
-    if (r) r.remove();
-
     const deltaTime = fpsInfo(timestamp);
+
+    updateGrid();
     computeSnake(deltaTime);
-
-    grid = createGrid();
-
-    const root = document.createElement('div');
-    root.id = 'root';
-    root.style.position = 'relative';
-
-    for (let row = 0; row < gridHeight; row++) {
-      for (let col = 0; col < gridWidth; col++) {
-        root.appendChild(grid[row][col]);
-      }
-    }
-
-    root.appendChild(fpsLabel);
-    body.appendChild(root);
-
     window.requestAnimationFrame(drawElements);
   }
 
@@ -165,8 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
     h = body.clientHeight;
     gridWidth = Math.floor(w / CELL_SIZE);
     gridHeight = Math.floor(h / CELL_SIZE);
+
+    createGrid();
   }
 
+  createGrid();
   generateFood();
 
   window.addEventListener('resize', resize);
